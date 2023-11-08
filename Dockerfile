@@ -1,4 +1,4 @@
-FROM node:20-slim AS builder
+FROM node:18 AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ RUN corepack enable \
  && pnpm i --frozen-lockfile --aggregate-output \
  && NODE_ENV=production pnpm run build
 
-FROM node:20-slim
+FROM node:18-slim
 
 WORKDIR /app
 
