@@ -21,6 +21,7 @@ RUN apt-get update \
  && pnpm i --frozen-lockfile --aggregate-output
 
 ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so
+ENV VIPS_CONCURRENCY=1
 
 COPY --from=builder /app/built ./built
 COPY --from=builder /app/server.js ./
