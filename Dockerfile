@@ -2,6 +2,14 @@
 
 ARG NODE_VERSION=22
 
+FROM --platform=$TARGETPLATFORM node:${NODE_VERSION}-slim AS builder
+
+WORKDIR /app
+COPY . ./
+RUN corepack enable \
+ && pnpm i --frozen-lockfile --aggregate-output \
+ && NODE_ENV=production pnpm run build
+
 FROM --platform=$TARGETPLATFORM node:${NODE_VERSION}-slim
 
 ARG UID="991"
@@ -12,22 +20,23 @@ RUN apt-get update \
   libjemalloc-dev libjemalloc2 \
   && ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so \
   && corepack enable \
-  && groupadd -g "${GID}" proxy \
-  && useradd -l -u "${UID}" -g "${GID}" -m -d /app proxy \
+  && groupadd -g "${GID}" media-proxy \
+  && useradd -l -u "${UID}" -g "${GID}" -m -d /app media-proxy \
   && find / -type d -path /sys -prune -o -type d -path /proc -prune -o -type f -perm /u+s -ignore_readdir_race -exec chmod u-s {} \; \
   && find / -type d -path /sys -prune -o -type d -path /proc -prune -o -type f -perm /g+s -ignore_readdir_race -exec chmod g-s {} \; \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists
 
-USER proxy
+USER media-proxy
 WORKDIR /app
-COPY --chown=proxy:proxy . ./
+COPY --chown=media-proxy:media-proxy . ./
+COPY --from=builder --chown=media-proxy:media-proxy /app/built ./built
+COPY --from=builder --chown=media-proxy:media-proxy /app/server.js ./
 
 ENV NODE_ENV=production
 
 RUN corepack install \
   && pnpm i --frozen-lockfile --aggregate-output \
-  && pnpm run build \
   && corepack pack
 
 ENV COREPACK_ENABLE_NETWORK=0
