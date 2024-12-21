@@ -2,12 +2,13 @@ import * as fs from 'node:fs';
 import * as http from 'node:http';
 import * as https from 'node:https';
 import { fileURLToPath } from 'node:url';
+import { EventEmitter } from 'node:events';
 import { dirname } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import { createTemp } from './create-temp.js';
 import { FILE_TYPE_BROWSERSAFE } from './const.js';
 import { IImageStreamable, convertToWebpStream, webpDefault, convertSharpToWebpStream } from './image-processor.js';
-import type { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginOptions } from 'fastify';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { detectType, isMimeImage } from './file-info.js';
 import sharp from 'sharp';
 import { sharpBmp } from '@misskey-dev/sharp-read-bmp';
@@ -15,6 +16,8 @@ import { StatusError } from './status-error.js';
 import { DownloadConfig, defaultDownloadConfig, downloadUrl } from './download.js';
 import { getAgents } from './http.js';
 import _contentDisposition from 'content-disposition';
+
+EventEmitter.defaultMaxListeners = 25;
 
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
@@ -99,7 +102,7 @@ export default function (fastify: FastifyInstance, options: MediaProxyOptions | 
 }
 
 function errorHandler(request: FastifyRequest<{ Params?: { [x: string]: any }; Querystring?: { [x: string]: any }; }>, reply: FastifyReply, err?: any) {
-    console.log(`${err}`);
+    console.error(request.url, [err]);
 
     reply.header('Cache-Control', 'max-age=300');
 
@@ -108,20 +111,17 @@ function errorHandler(request: FastifyRequest<{ Params?: { [x: string]: any }; Q
     }
 
     if (err instanceof StatusError && (err.statusCode === 302 || err.isClientError)) {
-        reply.code(err.statusCode);
-        return;
+        return reply.send(err);
+    } else {
+        return reply.code(500).send(err as Error);
     }
-
-    reply.code(500);
-    return;
 }
 
 async function proxyHandler(request: FastifyRequest<{ Params: { url: string; }; Querystring: { url?: string; }; }>, reply: FastifyReply) {
     const url = 'url' in request.query ? request.query.url : (request.params.url && 'https://' + request.params.url);
 
     if (!url || typeof url !== 'string') {
-        reply.code(400);
-        return;
+        return reply.code(400).send({ error: 'Bad Request', message: 'URL is required' });
     }
 
     // Create temp file

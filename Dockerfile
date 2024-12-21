@@ -1,30 +1,38 @@
-FROM node:20-slim AS builder
+# syntax = docker/dockerfile:1.4
 
+ARG NODE_VERSION=22
+
+FROM --platform=$TARGETPLATFORM node:${NODE_VERSION}-slim
+
+ARG UID="991"
+ARG GID="991"
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+  libjemalloc-dev libjemalloc2 \
+  && ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so \
+  && corepack enable \
+  && groupadd -g "${GID}" proxy \
+  && useradd -l -u "${UID}" -g "${GID}" -m -d /app proxy \
+  && find / -type d -path /sys -prune -o -type d -path /proc -prune -o -type f -perm /u+s -ignore_readdir_race -exec chmod u-s {} \; \
+  && find / -type d -path /sys -prune -o -type d -path /proc -prune -o -type f -perm /g+s -ignore_readdir_race -exec chmod g-s {} \; \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists
+
+USER proxy
 WORKDIR /app
-
-COPY ./ ./
-RUN corepack enable \
- && pnpm i --frozen-lockfile --aggregate-output \
- && NODE_ENV=production pnpm run build
-
-FROM node:20-slim
-
-WORKDIR /app
+COPY --chown=proxy:proxy . ./
 
 ENV NODE_ENV=production
 
-COPY --from=builder /app/package.json /app/pnpm-lock.yaml ./
-RUN apt-get update \
- && apt-get install -yqq --no-install-recommends libjemalloc2 \
- && ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so \
- && corepack enable \
- && pnpm i --frozen-lockfile --aggregate-output
+RUN corepack install \
+  && pnpm i --frozen-lockfile --aggregate-output \
+  && pnpm run build \
+  && corepack pack
 
+ENV COREPACK_ENABLE_NETWORK=0
 ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so
-ENV VIPS_CONCURRENCY=1
-
-COPY --from=builder /app/built ./built
-COPY --from=builder /app/server.js ./
+ENV MALLOC_CONF=background_thread:true,metadata_thp:auto,dirty_decay_ms:30000,muzzy_decay_ms:30000
 
 CMD ["pnpm", "run", "start"]
 
