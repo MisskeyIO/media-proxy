@@ -19,7 +19,6 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   libjemalloc-dev libjemalloc2 \
   && ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so \
-  && corepack enable \
   && groupadd -g "${GID}" media-proxy \
   && useradd -l -u "${UID}" -g "${GID}" -m -d /app media-proxy \
   && find / -type d -path /sys -prune -o -type d -path /proc -prune -o -type f -perm /u+s -ignore_readdir_race -exec chmod u-s {} \; \
@@ -36,8 +35,8 @@ COPY --from=builder --chown=media-proxy:media-proxy /app/server.js ./
 ENV NODE_ENV=production
 
 RUN corepack install \
-  && pnpm i --frozen-lockfile --aggregate-output \
-  && corepack pack
+  && corepack enable \
+  && pnpm i --frozen-lockfile --aggregate-output
 
 ENV COREPACK_ENABLE_NETWORK=0
 ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so
