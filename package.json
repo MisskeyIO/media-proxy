@@ -39,7 +39,7 @@
     "cacheable-lookup": "7.0.0",
     "content-disposition": "0.5.4",
     "fastify": "5.2.0",
-    "fastify-cli": "7.2.0",
+    "fastify-cli": "7.3.0",
     "file-type": "19.6.0",
     "got": "14.4.5",
     "hpagent": "1.2.0",
