@@ -18,9 +18,10 @@ Misskeyサーバーのapi/metaの応答に、使用するべきメディアプ�
 
 メディアプロキシへは、クエリ文字列によって命令を行う。
 
-拡張子によってキャッシュの挙動を変えるCDNがあるため、image.webp、avatar.webp、static.webpなどの適当なファイル名を付加するべきである。  
+~~拡張子によってキャッシュの挙動を変えるCDNがあるため、image.webp、avatar.webp、static.webpなどの適当なファイル名を付加するべきである。~~  
 例:  
-`https://example.com/proxy/image.webp?url=https%3A%2F%2F......`
+~~`https://example.com/proxy/image.webp?url=https%3A%2F%2F......`~~  
+`https://example.com/proxy/image/https%3A%2F%2F......`
 
 Acceptヘッダーは無視される。  
 Cache-Controlは、正常なレスポンスの場合`max-age=31536000, immutable`、エラーレスポンスの場合`max-age=300`である。  
@@ -29,12 +30,13 @@ Content-Security-Policyは、`default-src 'none'; img-src 'self'; media-src 'sel
 Content-Dispositionは、filenameは元画像のContent-Disposition.filenameもしくはファイル名に基づいて挿入される。拡張子は適宜変更され、octet-streamの場合は拡張子として.unknownが付加される。inlineが指定される。
 
 ### クエリの一覧
-#### url (必須)
+#### url (deprecated)
 変換ないしはプロキシを行う対象の、元画像のURLを指定する。  
 指定がなかった場合はHTTPコード400が返される。
 
 https://www.google.com/images/errors/robot.png をプロキシする場合:  
-`https://example.com/proxy/image.webp?url=https%3A%2F%2Fwww.google.com%2Fimages%2Ferrors%2Frobot.png`
+~~`https://example.com/proxy/image.webp?url=https%3A%2F%2Fwww.google.com%2Fimages%2Ferrors%2Frobot.png`~~  
+`https://example.com/proxy/image/https%3A%2F%2Fwww.google.com%2Fimages%2Ferrors%2Frobot.png`
 
 #### origin (本体のみ)
 存在すると、外部メディアプロキシへのリダイレクトを行わない。

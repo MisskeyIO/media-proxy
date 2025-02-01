@@ -38,6 +38,29 @@ export type MediaProxyOptions = {
     httpsAgent: https.Agent;
 });
 
+interface RequestParams {
+    type: string;
+    url: string;
+}
+
+interface RequestParamsForBackwardCompatibility {
+    filename: string;
+}
+
+interface RequestQueryForBackwardCompatibility {
+    url?: string;
+}
+
+interface TransformQuery {
+    origin?: string;
+    fallback?: string;
+    emoji?: string;
+    avatar?: string;
+    static?: string;
+    preview?: string;
+    badge?: string;
+}
+
 let config: DownloadConfig = defaultDownloadConfig;
 
 export function setMediaProxyConfig(setting?: MediaProxyOptions | null) {
@@ -91,9 +114,17 @@ export default function (fastify: FastifyInstance, options: MediaProxyOptions | 
     });
 
     fastify.get<{
-        Params: { url: string; };
-        Querystring: { url?: string; };
-    }>('/:url*', async (request, reply) => {
+        Params: RequestParams;
+        Querystring: TransformQuery;
+    }>('/:type/:url', async (request, reply) => {
+        return await proxyHandler(request, reply)
+            .catch(err => errorHandler(request, reply, err));
+    });
+
+    fastify.get<{
+        Params: RequestParamsForBackwardCompatibility;
+        Querystring: RequestQueryForBackwardCompatibility & TransformQuery;
+    }>('/:filename', async (request, reply) => {
         return await proxyHandler(request, reply)
             .catch(err => errorHandler(request, reply, err));
     });
@@ -117,12 +148,30 @@ function errorHandler(request: FastifyRequest<{ Params?: { [x: string]: any }; Q
     }
 }
 
-async function proxyHandler(request: FastifyRequest<{ Params: { url: string; }; Querystring: { url?: string; }; }>, reply: FastifyReply) {
-    const url = 'url' in request.query ? request.query.url : (request.params.url && 'https://' + request.params.url);
+async function proxyHandler(request: FastifyRequest<{
+    Params: RequestParams | RequestParamsForBackwardCompatibility;
+    Querystring: TransformQuery | RequestQueryForBackwardCompatibility & TransformQuery;
+}>, reply: FastifyReply) {
+    let url: string | undefined = undefined;
+    if ('type' in request.params && 'url' in request.params) {
+        url = request.params.url;
+    } else if ('url' in request.query) {
+        url = request.query.url;
+    }
 
-    if (!url || typeof url !== 'string') {
+    // noinspection HttpUrlsUsage
+    if (url
+      && !url.startsWith('http://')
+      && !url.startsWith('https://')
+    ) {
+        url = 'https://' + url;
+    }
+
+    if (!url) {
         return reply.code(400).send({ error: 'Bad Request', message: 'URL is required' });
     }
+
+    const transformQuery = request.query as TransformQuery;
 
     // Create temp file
     const file = await downloadAndDetectTypeFromUrl(url);
@@ -132,11 +181,11 @@ async function proxyHandler(request: FastifyRequest<{ Params: { url: string; }; 
         const isAnimationConvertibleImage = isMimeImage(file.mime, 'sharp-animation-convertible-image');
 
         if (
-            'emoji' in request.query ||
-            'avatar' in request.query ||
-            'static' in request.query ||
-            'preview' in request.query ||
-            'badge' in request.query
+            'emoji' in transformQuery ||
+            'avatar' in transformQuery ||
+            'static' in transformQuery ||
+            'preview' in transformQuery ||
+            'badge' in transformQuery
         ) {
             if (!isConvertibleImage) {
                 // 画像でないなら404でお茶を濁す
@@ -146,17 +195,17 @@ async function proxyHandler(request: FastifyRequest<{ Params: { url: string; }; 
 
         let image: IImageStreamable | null = null;
 
-        if ('emoji' in request.query || 'avatar' in request.query) {
-            if (!isAnimationConvertibleImage && !('static' in request.query)) {
+        if ('emoji' in transformQuery || 'avatar' in transformQuery) {
+            if (!isAnimationConvertibleImage && !('static' in transformQuery)) {
                 image = {
                     data: fs.createReadStream(file.path),
                     ext: file.ext,
                     type: file.mime,
                 };
             } else {
-                const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in request.query) }))
+                const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in transformQuery) }))
                     .resize({
-                        height: 'emoji' in request.query ? 128 : 320,
+                        height: 'emoji' in transformQuery ? 128 : 320,
                         withoutEnlargement: true,
                     })
                     .webp(webpDefault);
@@ -167,11 +216,11 @@ async function proxyHandler(request: FastifyRequest<{ Params: { url: string; }; 
                     type: 'image/webp',
                 };
             }
-        } else if ('static' in request.query) {
+        } else if ('static' in transformQuery) {
             image = convertSharpToWebpStream(await sharpBmp(file.path, file.mime), 498, 422);
-        } else if ('preview' in request.query) {
+        } else if ('preview' in transformQuery) {
             image = convertSharpToWebpStream(await sharpBmp(file.path, file.mime), 200, 200);
-        } else if ('badge' in request.query) {
+        } else if ('badge' in transformQuery) {
             const mask = (await sharpBmp(file.path, file.mime))
                 .resize(96, 96, {
                     fit: 'contain',
