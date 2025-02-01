@@ -32,7 +32,7 @@ USER media-proxy
 WORKDIR /app
 COPY --chown=media-proxy:media-proxy . ./
 COPY --from=build --chown=media-proxy:media-proxy /app/built ./built
-COPY --from=build --chown=media-proxy:media-proxy /app/server.js ./
+COPY --from=build --chown=media-proxy:media-proxy /app/server.mjs ./
 
 ENV NODE_ENV=production
 RUN pnpm i --frozen-lockfile --aggregate-output
