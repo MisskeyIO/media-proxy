@@ -3,7 +3,7 @@
   "version": "0.0.24",
   "description": "The Media Proxy for Misskey",
   "main": "built/index.js",
-  "packageManager": "pnpm@9.15.1+sha512.1acb565e6193efbebda772702950469150cf12bcc764262e7587e71d19dc98a423dff9536e57ea44c49bdf790ff694e83c27be5faa23d67e0c033b583be4bfcf",
+  "packageManager": "pnpm@9.15.4",
   "type": "module",
   "files": [
     "built",
@@ -26,21 +26,21 @@
   },
   "homepage": "https://github.com/misskey-dev/media-proxy#readme",
   "devDependencies": {
-    "@swc/cli": "0.5.2",
-    "@swc/core": "1.10.1",
+    "@swc/cli": "0.6.0",
+    "@swc/core": "1.10.12",
     "@types/content-disposition": "0.5.8",
-    "@types/node": "22.10.2",
+    "@types/node": "22.13.0",
     "@types/tmp": "0.2.6",
-    "typescript": "5.7.2"
+    "typescript": "5.7.3"
   },
   "dependencies": {
-    "@fastify/static": "8.0.3",
+    "@fastify/static": "8.0.4",
     "@misskey-dev/sharp-read-bmp": "1.2.0",
     "cacheable-lookup": "7.0.0",
     "content-disposition": "0.5.4",
-    "fastify": "5.2.0",
-    "fastify-cli": "7.2.0",
-    "file-type": "19.6.0",
+    "fastify": "5.2.1",
+    "fastify-cli": "7.3.0",
+    "file-type": "20.0.1",
     "got": "14.4.5",
     "hpagent": "1.2.0",
     "ip-cidr": "4.0.2",

@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { EventEmitter } from 'node:events';
 import { dirname } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import { createTemp } from './create-temp.js';
@@ -12,6 +13,7 @@ import { StatusError } from './status-error.js';
 import { defaultDownloadConfig, downloadUrl } from './download.js';
 import { getAgents } from './http.js';
 import _contentDisposition from 'content-disposition';
+EventEmitter.defaultMaxListeners = 25;
 const _filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(_filename);
 const assets = `${_dirname}/../assets/`;
@@ -65,23 +67,22 @@ export default function (fastify, options, done) {
     done();
 }
 function errorHandler(request, reply, err) {
-    console.log(`${err}`);
+    console.error(request.url, [err]);
     reply.header('Cache-Control', 'max-age=300');
     if (request.query && 'fallback' in request.query) {
         return reply.sendFile('/dummy.png', assets);
     }
     if (err instanceof StatusError && (err.statusCode === 302 || err.isClientError)) {
-        reply.code(err.statusCode);
-        return;
+        return reply.send(err);
     }
-    reply.code(500);
-    return;
+    else {
+        return reply.code(500).send(err);
+    }
 }
 async function proxyHandler(request, reply) {
     const url = 'url' in request.query ? request.query.url : (request.params.url && 'https://' + request.params.url);
     if (!url || typeof url !== 'string') {
-        reply.code(400);
-        return;
+        return reply.code(400).send({ error: 'Bad Request', message: 'URL is required' });
     }
     // Create temp file
     const file = await downloadAndDetectTypeFromUrl(url);
