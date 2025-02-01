@@ -18,7 +18,7 @@ closeWithGrace({ delay: process.env.FASTIFY_CLOSE_GRACE_DELAY || 500 }, async fu
     await fastifyInstance.close();
 });
 
-fastifyInstance.listen({ port: process.env.PORT || 3000 }, (err) => {
+fastifyInstance.listen({ port: process.env.PORT || 3000, host: '::' }, (err) => {
     if (err) {
         fastifyInstance.log.error(err);
         process.exit(1);
