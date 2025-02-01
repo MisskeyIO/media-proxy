@@ -60,7 +60,11 @@ export default function (fastify, options, done) {
         root: _dirname,
         serve: false,
     });
-    fastify.get('/:url*', async (request, reply) => {
+    fastify.get('/:type/:url', async (request, reply) => {
+        return await proxyHandler(request, reply)
+            .catch(err => errorHandler(request, reply, err));
+    });
+    fastify.get('/:filename', async (request, reply) => {
         return await proxyHandler(request, reply)
             .catch(err => errorHandler(request, reply, err));
     });
@@ -80,28 +84,41 @@ function errorHandler(request, reply, err) {
     }
 }
 async function proxyHandler(request, reply) {
-    const url = 'url' in request.query ? request.query.url : (request.params.url && 'https://' + request.params.url);
-    if (!url || typeof url !== 'string') {
+    let url = undefined;
+    if ('type' in request.params && 'url' in request.params) {
+        url = request.params.url;
+    }
+    else if ('url' in request.query) {
+        url = request.query.url;
+    }
+    // noinspection HttpUrlsUsage
+    if (url
+        && !url.startsWith('http://')
+        && !url.startsWith('https://')) {
+        url = 'https://' + url;
+    }
+    if (!url) {
         return reply.code(400).send({ error: 'Bad Request', message: 'URL is required' });
     }
+    const transformQuery = request.query;
     // Create temp file
     const file = await downloadAndDetectTypeFromUrl(url);
     try {
         const isConvertibleImage = isMimeImage(file.mime, 'sharp-convertible-image');
         const isAnimationConvertibleImage = isMimeImage(file.mime, 'sharp-animation-convertible-image');
-        if ('emoji' in request.query ||
-            'avatar' in request.query ||
-            'static' in request.query ||
-            'preview' in request.query ||
-            'badge' in request.query) {
+        if ('emoji' in transformQuery ||
+            'avatar' in transformQuery ||
+            'static' in transformQuery ||
+            'preview' in transformQuery ||
+            'badge' in transformQuery) {
             if (!isConvertibleImage) {
                 // 画像でないなら404でお茶を濁す
                 throw new StatusError('Unexpected mime', 404);
             }
         }
         let image = null;
-        if ('emoji' in request.query || 'avatar' in request.query) {
-            if (!isAnimationConvertibleImage && !('static' in request.query)) {
+        if ('emoji' in transformQuery || 'avatar' in transformQuery) {
+            if (!isAnimationConvertibleImage && !('static' in transformQuery)) {
                 image = {
                     data: fs.createReadStream(file.path),
                     ext: file.ext,
@@ -109,9 +126,9 @@ async function proxyHandler(request, reply) {
                 };
             }
             else {
-                const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in request.query) }))
+                const data = (await sharpBmp(file.path, file.mime, { animated: !('static' in transformQuery) }))
                     .resize({
-                    height: 'emoji' in request.query ? 128 : 320,
+                    height: 'emoji' in transformQuery ? 128 : 320,
                     withoutEnlargement: true,
                 })
                     .webp(webpDefault);
@@ -122,13 +139,13 @@ async function proxyHandler(request, reply) {
                 };
             }
         }
-        else if ('static' in request.query) {
+        else if ('static' in transformQuery) {
             image = convertSharpToWebpStream(await sharpBmp(file.path, file.mime), 498, 422);
         }
-        else if ('preview' in request.query) {
+        else if ('preview' in transformQuery) {
             image = convertSharpToWebpStream(await sharpBmp(file.path, file.mime), 200, 200);
         }
-        else if ('badge' in request.query) {
+        else if ('badge' in transformQuery) {
             const mask = (await sharpBmp(file.path, file.mime))
                 .resize(96, 96, {
                 fit: 'contain',
