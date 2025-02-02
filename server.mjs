@@ -4,7 +4,7 @@ import config from './config.js';
 import app from './built/index.js';
 
 const fastifyInstance = fastify({
-    logger: true,
+    logger: { level: process.env.FASTIFY_LOG_LEVEL || 'warn' },
     maxParamLength: 1024,
 });
 
