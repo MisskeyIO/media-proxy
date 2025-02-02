@@ -5,6 +5,7 @@ import * as http from 'node:http';
 import * as https from 'node:https';
 import ipaddr from 'ipaddr.js';
 import got, * as Got from 'got';
+import { fastifyLogger } from './logger.js';
 import { StatusError } from './status-error.js';
 import { getAgents } from './http.js';
 import { parse } from 'content-disposition';
@@ -32,7 +33,7 @@ export const defaultDownloadConfig = {
 export async function downloadUrl(url: string, path: string, settings:DownloadConfig = defaultDownloadConfig): Promise<{
     filename: string;
 }> {
-    if (process.env.NODE_ENV !== 'production') console.log(`Downloading ${url} to ${path} ...`);
+    fastifyLogger.log.info(`Downloading ${url} to ${path} ...`);
 
     const timeout = 30 * 1000;
     const operationTimeout = 60 * 1000;
@@ -65,7 +66,7 @@ export async function downloadUrl(url: string, path: string, settings:DownloadCo
     }).on('response', (res: Got.Response) => {
         if ((process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test') && !settings.proxy && res.ip) {
             if (isPrivateIp(res.ip, settings.allowedPrivateNetworks)) {
-                console.log(`Blocked address: ${res.ip}`);
+                fastifyLogger.log.warn({ url }, `Access to private IP address (${res.ip}) is blocked`);
                 req.destroy();
             }
         }
@@ -74,7 +75,7 @@ export async function downloadUrl(url: string, path: string, settings:DownloadCo
         if (contentLength != null) {
             const size = Number(contentLength);
             if (size > settings.maxSize) {
-                console.log(`maxSize exceeded (${size} > ${settings.maxSize}) on response`);
+                fastifyLogger.log.warn({ url }, `maxSize exceeded (${size} > ${settings.maxSize}) on response`);
                 req.destroy();
             }
         }
@@ -87,12 +88,12 @@ export async function downloadUrl(url: string, path: string, settings:DownloadCo
                     filename = parsed.parameters.filename;
                 }
             } catch (e) {
-                console.log(`Failed to parse content-disposition: ${contentDisposition}\n${e}`);
+                fastifyLogger.log.warn({ url, error: e }, `Failed to parse content-disposition: ${contentDisposition}`);
             }
         }
     }).on('downloadProgress', (progress: Got.Progress) => {
         if (progress.transferred > settings.maxSize) {
-            console.log(`maxSize exceeded (${progress.transferred} > ${settings.maxSize}) on downloadProgress`);
+            fastifyLogger.log.warn({ url }, `maxSize exceeded (${progress.transferred} > ${settings.maxSize}) on downloadProgress`);
             req.destroy();
         }
     });
@@ -107,7 +108,7 @@ export async function downloadUrl(url: string, path: string, settings:DownloadCo
         }
     }
 
-    if (process.env.NODE_ENV !== 'production') console.log(`Download finished: ${url}`);
+    fastifyLogger.log.info(`Download finished: ${url}`);
 
     return {
         filename,
