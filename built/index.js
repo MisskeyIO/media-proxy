@@ -4,6 +4,7 @@ import { EventEmitter } from 'node:events';
 import { dirname } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import { createTemp } from './create-temp.js';
+import { fastifyLogger } from './logger.js';
 import { FILE_TYPE_BROWSERSAFE } from './const.js';
 import { convertToWebpStream, webpDefault, convertSharpToWebpStream } from './image-processor.js';
 import { detectType, isMimeImage } from './file-info.js';
@@ -26,7 +27,7 @@ export function setMediaProxyConfig(setting) {
             ...(proxy ? getAgents(proxy) : {}),
             proxy: !!proxy,
         };
-        console.log(config);
+        fastifyLogger.log.info(config);
         return;
     }
     config = {
@@ -42,7 +43,7 @@ export function setMediaProxyConfig(setting) {
             } :
                 { ...getAgents(proxy), proxy: !!proxy }),
     };
-    console.log(config);
+    fastifyLogger.log.info(config);
 }
 export default function (fastify, options, done) {
     setMediaProxyConfig(options);
@@ -71,7 +72,7 @@ export default function (fastify, options, done) {
     done();
 }
 function errorHandler(request, reply, err) {
-    console.error(request.url, [err]);
+    fastifyLogger.log.error({ request: { method: request.method, url: request.url, headers: request.headers }, error: err }, `An error occurred in media-proxy: ${err}`);
     reply.header('Cache-Control', 'max-age=300');
     if (request.query && 'fallback' in request.query) {
         return reply.sendFile('/dummy.png', assets);

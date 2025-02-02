@@ -6,6 +6,7 @@ import { EventEmitter } from 'node:events';
 import { dirname } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import { createTemp } from './create-temp.js';
+import { fastifyLogger } from './logger.js';
 import { FILE_TYPE_BROWSERSAFE } from './const.js';
 import { IImageStreamable, convertToWebpStream, webpDefault, convertSharpToWebpStream } from './image-processor.js';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
@@ -72,7 +73,7 @@ export function setMediaProxyConfig(setting?: MediaProxyOptions | null) {
             ...(proxy ? getAgents(proxy) : {}),
             proxy: !!proxy,
         };
-        console.log(config);
+        fastifyLogger.log.info(config);
         return;
     }
 
@@ -90,7 +91,7 @@ export function setMediaProxyConfig(setting?: MediaProxyOptions | null) {
             { ...getAgents(proxy), proxy: !!proxy }),
     };
 
-    console.log(config);
+    fastifyLogger.log.info(config);
 }
 
 export default function (fastify: FastifyInstance, options: MediaProxyOptions | null | undefined, done: (err?: Error) => void) {
@@ -133,7 +134,7 @@ export default function (fastify: FastifyInstance, options: MediaProxyOptions | 
 }
 
 function errorHandler(request: FastifyRequest<{ Params?: { [x: string]: any }; Querystring?: { [x: string]: any }; }>, reply: FastifyReply, err?: any) {
-    console.error(request.url, [err]);
+    fastifyLogger.log.error({ request: { method: request.method, url: request.url, headers: request.headers }, error: err }, `An error occurred in media-proxy: ${err}`);
 
     reply.header('Cache-Control', 'max-age=300');
 
