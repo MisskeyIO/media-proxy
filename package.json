@@ -43,7 +43,7 @@
     "close-with-grace": "2.2.0",
     "content-disposition": "0.5.4",
     "fastify": "5.2.1",
-    "file-type": "20.0.1",
+    "file-type": "20.1.0",
     "got": "14.4.5",
     "hpagent": "1.2.0",
     "ip-cidr": "4.0.2",
