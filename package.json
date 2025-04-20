@@ -42,7 +42,7 @@
     "cacheable-lookup": "7.0.0",
     "close-with-grace": "2.2.0",
     "content-disposition": "0.5.4",
-    "fastify": "5.2.1",
+    "fastify": "5.3.2",
     "file-type": "20.0.1",
     "got": "14.4.5",
     "hpagent": "1.2.0",
