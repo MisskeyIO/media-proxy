@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/misskey-dev/media-proxy#readme",
   "devDependencies": {
-    "@swc/cli": "0.7.5",
+    "@swc/cli": "0.7.7",
     "@swc/core": "1.11.24",
     "@types/content-disposition": "0.5.8",
     "@types/node": "22.15.17",
