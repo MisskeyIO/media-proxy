@@ -23,7 +23,6 @@ export const webpDefault: sharp.WebpOptions = {
     smartSubsample: true,
     mixed: true,
     effort: 2,
-    loop: 0,
 };
 
 export function convertToWebpStream(path: string, width: number, height: number, options: sharp.WebpOptions = webpDefault): IImageStream {
