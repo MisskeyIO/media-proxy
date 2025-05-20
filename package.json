@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/misskey-dev/media-proxy#readme",
   "resolutions": {
-    "sharp": "0.34.0-rc.0"
+    "sharp": "0.34.2"
   },
   "devDependencies": {
     "@swc/cli": "0.7.7",
@@ -54,7 +54,7 @@
     "is-svg": "6.0.0",
     "pino": "9.6.0",
     "private-ip": "3.0.2",
-    "sharp": "0.34.0-rc.0",
+    "sharp": "0.34.2",
     "tmp": "0.2.3"
   },
   "pnpm": {
