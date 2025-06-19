@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@swc/cli": "0.7.7",
-    "@swc/core": "1.11.24",
+    "@swc/core": "1.12.3",
     "@types/content-disposition": "0.5.8",
     "@types/node": "22.15.17",
     "@types/tmp": "0.2.6",
