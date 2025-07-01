@@ -33,7 +33,7 @@
     "@swc/cli": "0.7.7",
     "@swc/core": "1.11.24",
     "@types/content-disposition": "0.5.8",
-    "@types/node": "22.15.17",
+    "@types/node": "24.0.10",
     "@types/tmp": "0.2.6",
     "cross-env": "7.0.3",
     "nodemon": "3.1.10",
