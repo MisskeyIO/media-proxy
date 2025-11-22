@@ -5,21 +5,23 @@ import config from './config.js';
 import app from './built/index.js';
 import { fastifyLogger } from './built/logger.js';
 
-const fastifyInstance = fastify({
-    logger: {
-        serializers: {
-            ...pino.stdSerializers,
-            err: pino.stdSerializers.errWithCause,
-        },
-        level: process.env.FASTIFY_LOG_LEVEL || (process.env.NODE_ENV !== 'production' ? 'info' : 'warn'),
-        depthLimit: 8,
-        edgeLimit: 128,
-        messageKey: 'message',
-        errorKey: 'error',
-        formatters: {
-            level: (label, number) => ({ severity: label, level: number }),
-        },
+const pinoInstance = pino({
+    serializers: {
+        ...pino.stdSerializers,
+        err: pino.stdSerializers.errWithCause,
     },
+    level: process.env.FASTIFY_LOG_LEVEL || (process.env.NODE_ENV !== 'production' ? 'info' : 'warn'),
+    depthLimit: 8,
+    edgeLimit: 128,
+    messageKey: 'message',
+    errorKey: 'error',
+    formatters: {
+        level: (label, number) => ({ severity: label, level: number }),
+    },
+});
+
+const fastifyInstance = fastify({
+    loggerInstance: pinoInstance,
     maxParamLength: 1024,
 });
 

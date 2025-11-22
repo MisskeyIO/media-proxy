@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.4
 
-ARG NODE_VERSION=22
+ARG NODE_VERSION=24
 
 FROM --platform=$TARGETPLATFORM node:${NODE_VERSION}-slim AS base
 

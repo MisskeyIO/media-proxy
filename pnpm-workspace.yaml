@@ -1,0 +1,5 @@
+ignorePatchFailures: false
+
+onlyBuiltDependencies:
+  - '@swc/core'
+  - sharp
