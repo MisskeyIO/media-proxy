@@ -4,17 +4,28 @@ on:
   push:
     branches:
       - main
-
+    tags:
+      - '**'
   workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     if: github.repository == 'MisskeyIO/media-proxy'
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -31,6 +42,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare image tags
+        run: |
+          echo "FORMATTED_BRANCH_NAME=$(echo ${{ github.ref_name }} | sed -e 's/\//-/g' )" >> $GITHUB_ENV
       - name: Build and Push to GitHub Container Registry
         uses: docker/build-push-action@v6
         with:
@@ -39,5 +53,7 @@ jobs:
           push: true
           platforms: ${{ steps.buildx.outputs.platforms }}
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: ${{ env.FORMATTED_BRANCH_NAME }}
+          tags: |
+            ghcr.io/misskeyio/media-proxy:latest
+            ghcr.io/misskeyio/media-proxy:${{ env.FORMATTED_BRANCH_NAME }}
