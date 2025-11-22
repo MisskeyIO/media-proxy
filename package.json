@@ -25,6 +25,9 @@
     "url": "https://github.com/misskey-dev/media-proxy/issues"
   },
   "homepage": "https://github.com/misskey-dev/media-proxy#readme",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
     "@swc/cli": "0.7.9",
     "@swc/core": "1.15.3",
