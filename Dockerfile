@@ -17,7 +17,7 @@ RUN apt-get update \
  && find / -type d -path /sys -prune -o -type d -path /proc -prune -o -type f -perm /g+s -ignore_readdir_race -exec chmod g-s {} \; \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists \
- && npm install -g pnpm
+ && npm install -g pnpm@10
 
 FROM base AS build
 
