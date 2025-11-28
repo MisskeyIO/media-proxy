@@ -39,8 +39,8 @@ importers:
         specifier: 4.0.2
         version: 4.0.2
       ipaddr.js:
-        specifier: 2.2.0
-        version: 2.2.0
+        specifier: 2.3.0
+        version: 2.3.0
       is-svg:
         specifier: 6.1.0
         version: 6.1.0
@@ -948,8 +948,8 @@ packages:
     resolution: {integrity: sha512-fOCG6lhoKKakwv+C6KdsOnGvgXnmgfmp0myi3bcNwj3qfwPAxRKWEuFhvEFF7ceYIz6+1jRZ+yguLFAmUNPEfw==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  ipaddr.js@2.2.0:
-    resolution: {integrity: sha512-Ag3wB2o37wslZS19hZqorUnrnzSkpOVy+IiiDEiTqNubEYpYuHWIf6K4psgN2ZWKExS4xhVCrRVfb/wfW8fWJA==}
+  ipaddr.js@2.3.0:
+    resolution: {integrity: sha512-Zv/pA+ciVFbCSBBjGfaKUya/CcGmUHzTydLMaTwrUUEM2DIEO3iZvueGxmacvmN50fGpGVKeTXpb2LcYQxeVdg==}
     engines: {node: '>= 10'}
 
   is-binary-path@2.1.0:
@@ -1445,7 +1445,7 @@ snapshots:
   '@fastify/proxy-addr@5.1.0':
     dependencies:
       '@fastify/forwarded': 3.0.1
-      ipaddr.js: 2.2.0
+      ipaddr.js: 2.3.0
 
   '@fastify/send@4.1.0':
     dependencies:
@@ -2276,7 +2276,7 @@ snapshots:
 
   ip-regex@5.0.0: {}
 
-  ipaddr.js@2.2.0: {}
+  ipaddr.js@2.3.0: {}
 
   is-binary-path@2.1.0:
     dependencies:
@@ -2442,7 +2442,7 @@ snapshots:
     dependencies:
       '@chainsafe/is-ip': 2.1.0
       ip-regex: 5.0.0
-      ipaddr.js: 2.2.0
+      ipaddr.js: 2.3.0
       netmask: 2.0.2
 
   process-warning@4.0.1: {}
