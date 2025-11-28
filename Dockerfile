@@ -28,18 +28,19 @@ RUN pnpm i --frozen-lockfile --aggregate-output \
 
 FROM base AS runtime
 
-USER media-proxy
 WORKDIR /app
-COPY --chown=media-proxy:media-proxy . ./
-COPY --from=build --chown=media-proxy:media-proxy /app/built ./built
-COPY --from=build --chown=media-proxy:media-proxy /app/server.mjs ./
+COPY . ./
+COPY --from=build /app/built ./built
+COPY --from=build /app/server.mjs ./
 
 ENV NODE_ENV=production
-RUN pnpm i --force --frozen-lockfile --aggregate-output
+RUN pnpm i --frozen-lockfile --aggregate-output \
+ && chown -hR media-proxy:media-proxy /app
 
 ENV LD_PRELOAD=/usr/local/lib/libmimalloc.so
 ENV MIMALLOC_LARGE_OS_PAGES=0
 
+USER media-proxy
 CMD ["pnpm", "run", "start"]
 
 EXPOSE 3000
