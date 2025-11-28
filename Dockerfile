@@ -35,7 +35,7 @@ COPY --from=build --chown=media-proxy:media-proxy /app/built ./built
 COPY --from=build --chown=media-proxy:media-proxy /app/server.mjs ./
 
 ENV NODE_ENV=production
-RUN pnpm i --frozen-lockfile --aggregate-output
+RUN pnpm i --force --frozen-lockfile --aggregate-output
 
 ENV LD_PRELOAD=/usr/local/lib/libmimalloc.so
 ENV MIMALLOC_LARGE_OS_PAGES=0
