@@ -29,10 +29,10 @@
     "node": ">=20.0.0"
   },
   "devDependencies": {
-    "@swc/cli": "0.7.9",
+    "@swc/cli": "0.7.10",
     "@swc/core": "1.15.8",
     "@types/content-disposition": "0.5.9",
-    "@types/node": "25.0.3",
+    "@types/node": "~22",
     "@types/tmp": "0.2.6",
     "cross-env": "10.1.0",
     "nodemon": "3.1.11",
@@ -45,16 +45,16 @@
     "close-with-grace": "2.4.0",
     "content-disposition": "1.0.1",
     "fastify": "5.6.2",
-    "file-type": "21.2.0",
+    "file-type": "21.3.0",
     "got": "14.6.6",
     "hpagent": "1.2.0",
     "ip-cidr": "4.0.2",
     "ipaddr.js": "2.3.0",
     "is-svg": "6.1.0",
-    "pino": "10.1.0",
+    "pino": "10.1.1",
     "private-ip": "3.0.2",
     "sharp": "0.34.5",
     "tmp": "0.2.5"
   },
-  "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"
+  "packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
 }
